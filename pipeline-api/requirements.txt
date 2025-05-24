@@ -1,0 +1,7 @@
+boto3
+pika
+requests
+pydantic
+uvicorn
+fastapi
+rabbitmq
