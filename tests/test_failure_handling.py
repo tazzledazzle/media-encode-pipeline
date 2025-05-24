@@ -2,10 +2,11 @@
 import pytest
 import os
 import sys
-import os
+import pathlib
 
 # Add the project root to Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+PROJECT_ROOT = pathlib.Path(__file__).parent.parent.absolute()
+sys.path.append(str(PROJECT_ROOT))
 
 from tests.conftest import mock_s3_bucket
 from tests.fixtures import video_good

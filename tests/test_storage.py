@@ -3,10 +3,11 @@ import pytest
 import boto3
 from moto import mock_aws
 import sys
-import os
+import pathlib
 
 # Add the project root to Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+PROJECT_ROOT = pathlib.Path(__file__).parent.parent.absolute()
+sys.path.append(str(PROJECT_ROOT))
 
 from docker.ffmpeg_worker.encode_worker import upload_to_s3
 

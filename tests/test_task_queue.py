@@ -4,9 +4,11 @@ import os
 import json
 import boto3
 from moto import mock_aws
+import pathlib
 
 # Add the project root to Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+PROJECT_ROOT = pathlib.Path(__file__).parent.parent.absolute()
+sys.path.append(str(PROJECT_ROOT))
 
 from scripts.send_job import send_to_queue, receive_from_queue
 
