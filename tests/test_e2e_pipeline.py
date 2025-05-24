@@ -4,12 +4,14 @@ import boto3
 import os
 import sys
 from moto import mock_aws
+import pathlib
 
 # Add the project root to Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+PROJECT_ROOT = pathlib.Path(__file__).parent.parent.absolute()
+sys.path.append(str(PROJECT_ROOT))
 
 from scripts.send_job import send_to_queue
-from docker.ffmpeg_worker.encode_worker import receive_from_queue, run_ffmpeg, upload_to_s3
+from docker.ffmpeg_worker.encode_worker import fetch_job, run_ffmpeg, upload_to_s3
 from docker.qc_worker.qc_worker import run_all_qc
 
 @pytest.fixture(scope="function")
@@ -45,7 +47,7 @@ def test_full_pipeline(monkeypatch, tmp_path, aws_credentials):
     send_to_queue(job)
     
     # 2. Worker receives
-    recv_job = receive_from_queue()
+    recv_job = fetch_job()
     
     # 3. Encode
     output_file = tmp_path / "e2e_output_720p.mp4"

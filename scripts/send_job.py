@@ -22,6 +22,64 @@ RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
 RABBITMQ_QUEUE = os.getenv("RABBITMQ_QUEUE", "media-encode-jobs")
 RABBITMQ_USER = os.getenv("RABBITMQ_USER", "guest")
 RABBITMQ_PASSWORD = os.getenv("RABBITMQ_PASSWORD", "guest")
+def receive_from_sqs():
+    try:
+        sqs = boto3.client("sqs", region_name=AWS_REGION)
+        # Get the queue URL
+        response = sqs.get_queue_url(QueueName=SQS_QUEUE_NAME)
+        queue_url = response['QueueUrl']
+        # Receive the message
+        messages = sqs.receive_message(
+            QueueUrl=queue_url,
+            MaxNumberOfMessages=1,
+            WaitTimeSeconds=10
+        )
+        if 'Messages' in messages:
+            message = messages['Messages'][0]
+            receipt_handle = message['ReceiptHandle']
+            body = json.loads(message['Body'])
+            # Delete the message from the queue
+            sqs.delete_message(
+                QueueUrl=queue_url,
+                ReceiptHandle=receipt_handle
+            )
+            logger.info(f"Job received from SQS queue '{SQS_QUEUE_NAME}': {body['job_id']}")
+            return body
+        else:
+            logger.warning("No messages received from SQS.")
+            return None
+    except ClientError as e:
+        logger.error(f"Failed to receive job from SQS: {e}")
+        raise
+
+def receive_from_rabbitmq():
+    try:
+        credentials = pika.PlainCredentials(RABBITMQ_USER, RABBITMQ_PASSWORD)
+        parameters = pika.ConnectionParameters(host=RABBITMQ_HOST, credentials=credentials)
+        connection = pika.BlockingConnection(parameters)
+        channel = connection.channel()
+        channel.queue_declare(queue=RABBITMQ_QUEUE, durable=True)
+        method_frame, header_frame, body = channel.basic_get(queue=RABBITMQ_QUEUE, auto_ack=True)
+        if method_frame:
+            job = json.loads(body)
+            logger.info(f"Job received from RabbitMQ queue '{RABBITMQ_QUEUE}': {job['job_id']}")
+            connection.close()
+            return job
+        else:
+            logger.warning("No messages received from RabbitMQ.")
+            connection.close()
+            return None
+    except Exception as e:
+        logger.error(f"Failed to receive job from RabbitMQ: {e}")
+        raise
+
+def receive_from_queue():
+    if QUEUE_TYPE == "sqs":
+        return receive_from_sqs()
+    elif QUEUE_TYPE == "rabbitmq":
+        return receive_from_rabbitmq()
+    else:
+        raise ValueError(f"Unsupported QUEUE_TYPE: {QUEUE_TYPE}")
 
 def send_to_sqs(job: dict):
     try:
