@@ -1,15 +1,16 @@
 # tests/test_encode_worker.py
 import pytest
 import os
-from tests.conftest import mock_s3_bucket
-from tests.fixtures import video_good
 import sys
 import os
 
-# Add the docker directory to the Python path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'docker'))
+# Add the project root to Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ffmpeg_worker.encode_worker import run_ffmpeg
+from tests.conftest import mock_s3_bucket
+from tests.fixtures import video_good
+
+from docker.ffmpeg_worker.encode_worker import run_ffmpeg
 
 class TestEncodeWorker:
     def setup_class(self):

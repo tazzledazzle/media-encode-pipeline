@@ -3,10 +3,10 @@ import pytest
 import sys
 import os
 
-# Add the scripts directory to the Python path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'scripts'))
+# Add the project root to Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from send_job import send_to_queue, receive_from_queue
+from scripts.send_job import send_to_queue, receive_from_queue
 
 def test_queue_roundtrip():
     job = {"job_id": "test123", "input_url": "s3://bucket/test.mp4", "profiles": [{"name": "720p"}]}

@@ -1,14 +1,15 @@
 # tests/test_qc_worker.py
 import pytest
 import os
-from tests.conftest import mock_s3_bucket
-from tests.fixtures import video_good, video_black
 import sys
 
-# Add the docker directory to the Python path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'docker'))
+# Add the project root to Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from qc_worker.qc_worker import qc_black_frames, qc_loudness, qc_freeze
+from tests.conftest import mock_s3_bucket
+from tests.fixtures import video_good, video_black
+
+from docker.qc_worker.qc_worker import qc_black_frames, qc_loudness, qc_freeze
 
 class TestQCWorker:
     def setup_class(self):

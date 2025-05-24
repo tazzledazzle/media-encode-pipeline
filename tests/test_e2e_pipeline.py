@@ -3,6 +3,12 @@ import pytest
 import time
 import boto3
 from moto import mock_aws
+import sys
+import os
+
+# Add the project root to Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from scripts.send_job import send_to_queue
 from docker.ffmpeg_worker.encode_worker import receive_from_queue, run_ffmpeg, upload_to_s3
 from docker.qc_worker.qc_worker import run_all_qc
